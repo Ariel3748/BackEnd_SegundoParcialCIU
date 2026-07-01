@@ -1,0 +1,531 @@
+{
+  "info": {
+    "_postman_id": "fbbfdfef-7fb4-4f40-9823-c61e36360a15",
+    "name": "Anti-socialNetwork",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50173198",
+    "_collection_link": "https://go.postman.co/collection/50173198-fbbfdfef-7fb4-4f40-9823-c61e36360a15?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "tag",
+      "item": [
+        {
+          "name": "getAlltags",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"followerNick\":\"userPrueba02011\",\r\n    \"targetNick\":\"ariel_tech\"\r\n}"
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/tags",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "tags"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "newTag",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"name\":\"nuevaEtiqueta\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/tags",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "tags"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "posts",
+      "item": [
+        {
+          "name": "getAllPost",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"name\":\"nuevaEtiqueta\"\r\n}"
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/posts/",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "posts",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getPostxId",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"name\":\"nuevaEtiqueta\"\r\n}"
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/posts/1",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deletePost",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"description\":\"Nuevo post de prueba\",\r\n\"createDate\":\"2026-06-01\",\r\n\"nickName\":\"usarPrueba02011\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/posts/5",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "posts",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AssociateTag",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"tagId\":\"3\" //Aca va el Id del tag que se desa asociar los IdPost que vienen en los parametros\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/posts/6/tags",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "posts",
+                "6",
+                "tags"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createPost",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"description\":\"Descripcion de prueba\",\r\n    \"author\":\"6a3898fb36b0bee5a5d29a42\"\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/posts/",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "posts",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "editPost",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{   \r\n    \"description\":\"Descripcion de prueba editada desde POSTMAN\",\r\n    \"author\":\"6a\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/posts/6a389c7e36b0bee5a5d29a46",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "posts",
+                "6a389c7e36b0bee5a5d29a46"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "getAllUsers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{localhost/3000}}/users/",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "users",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getOneUserxNickName",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{localhost/3000}}/users/pablo_dev",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "users",
+                "pablo_dev"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CreateUser",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nickName\":\"userPrueba\",\r\n    \"firstName\":\"Juan\",\r\n    \"lastName\":\"Perez\",\r\n    \"birthdate\": \"1995-01-02\",\r\n    \"email\":\"emailPrueba@mail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/users",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateUser",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nickName\":\"userPruebaParcial\",\r\n    \"firstName\":\"Juancito\",\r\n    \"lastName\":\"Romero\",\r\n    \"birthdate\": \"1995-01-02\",\r\n    \"email\":\"emailPruebaparcial@mail.com\"\r\n}"
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/users/userPrueba",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "users",
+                "userPrueba"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteUser",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nickName\":\"userPruebaParcial\",\r\n    \"firstName\":\"Juan\",\r\n    \"lastName\":\"Perez\",\r\n    \"birthdate\": \"1995-01-02\",\r\n    \"email\":\"emailPruebaparcial@mail.com\"\r\n}"
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/users/userPrueba",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "users",
+                "userPrueba"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"followerNick\":\"userPrueba02011\",\r\n    \"targetNick\":\"ariel_tech\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/users/follow",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "users",
+                "follow"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "createComment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"comentario de Prueba\",\r\n    \"createDate\":\"2026-06-01\",\r\n    \"nickName\":\"userPrueba02011\",\r\n    \"visible\":\"True\",\r\n    \"postId\":\"6\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/comments",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "comments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteComment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"comentario de Prueba\",\r\n    \"createDate\":\"2026-06-01\",\r\n    \"nickName\":\"userPrueba02011\",\r\n    \"visible\":\"True\",\r\n    \"postId\":\"6\"\r\n}"
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/comments/6",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "comments",
+                "6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "editComment",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{   \r\n    \"postId\":\"6a389c5536b0bee5a5d29a45\",\r\n    \"author\":\"6a3898fb36b0bee5a5d29a42\",\r\n    \"text\":\"Este es el comentario editado enviado desde POSTMAN\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/comments/6a39fbcf33e7751a6de80f68",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "comments",
+                "6a39fbcf33e7751a6de80f68"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "post_Images",
+      "item": [
+        {
+          "name": "newPostImage",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "postId",
+                  "type": "text",
+                  "uuid": "9f31d5e4-9fc6-40f4-8c34-14d9c7031650",
+                  "value": "6"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "uuid": "645304b5-39ce-473b-afaa-1c7e969b3cbb",
+                  "src": "/C:/Users/ariel/Downloads/WhatsApp Image 2026-05-25 at 21.22.14 (1).jpeg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/post_images",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "post_images"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deltePostImage",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "postId",
+                  "type": "text",
+                  "uuid": "9f31d5e4-9fc6-40f4-8c34-14d9c7031650",
+                  "value": "6",
+                  "disabled": true
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "uuid": "645304b5-39ce-473b-afaa-1c7e969b3cbb",
+                  "src": "/C:/Users/ariel/Downloads/WhatsApp Image 2026-05-25 at 21.22.14 (1).jpeg",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{localhost/3000}}/post_images/6",
+              "host": [
+                "{{localhost/3000}}"
+              ],
+              "path": [
+                "post_images",
+                "6"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "localhost/3000",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

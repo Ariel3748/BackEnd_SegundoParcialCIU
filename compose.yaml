@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Servicio 1: El motor de Caché (Redis)
+  cache:
+    image: redis:7-alpine
+    container_name: anti_social_network_cache
+    restart: always
+    ports:
+      - "6380:6379"
+    networks:
+      - antisocial_network
+
+  # Servicio 2: Motor de Base de Datos Documental (MongoDB)
+  database:
+    image: mongo:6-jammy
+    container_name: anti_social_network_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - antisocial_network
+
+# Volúmenes para asegurar la persistencia de datos de MongoDB localmente
+volumes:
+  mongo_data:
+
+# Red interna para comunicar los contenedores entre sí de forma segura
+networks:
+  antisocial_network:
+    driver: bridge

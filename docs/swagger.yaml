@@ -1,0 +1,656 @@
+openapi: 3.0.3
+info:
+  title: UnaHur Anti-Social Net - API Documentation
+  description: >
+    Documentación oficial del MVP de la Red Anti-Social de la Universidad Nacional de Hurlingham (UnaHur).
+    Desarrollado con Node.js, Express, MongoDB (Mongoose) y caché optimizada en Redis.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de Desarrollo Local
+
+tags:
+  - name: Users
+    description: Gestión de usuarios registrados y relaciones de seguimiento (Followers).
+  - name: Posts
+    description: Publicaciones de usuarios, asignación de etiquetas y lectura optimizada con caché.
+  - name: Comments
+    description: Comentarios en publicaciones con filtrado temporal estricto (X meses).
+  - name: Post Images
+    description: Manejo de archivos multimedia vinculados a publicaciones.
+  - name: Tags
+    description: Etiquetas descriptivas para categorizar contenido.
+
+paths:
+  # --- ENDPOINTS: USERS ---
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Obtener todos los usuarios
+      description: Retorna la lista completa de usuarios registrados en el sistema.
+      responses:
+        "200":
+          description: Lista de usuarios obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    post:
+      tags:
+        - Users
+      summary: Crear un nuevo usuario
+      description: Registra un usuario único en el sistema. Calcula la edad de forma automática.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserForm"
+      responses:
+        "201":
+          description: Usuario creado exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /users/{nickName}:
+    get:
+      tags:
+        - Users
+      summary: Obtener un usuario por su nickName
+      description: Retorna el perfil completo del usuario resolviendo sus seguidores (followedBy) y seguidos (following).
+      parameters:
+        - name: nickName
+          in: path
+          required: true
+          description: Nombre de usuario único (identificador principal).
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Perfil de usuario encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    put:
+      tags:
+        - Users
+      summary: Actualizar datos de un usuario
+      description: Modifica los campos editables del usuario identificado por su nickName.
+      parameters:
+        - name: nickName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserForm"
+      responses:
+        "200":
+          description: Usuario actualizado con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Users
+      summary: Eliminar un usuario y todo su contenido
+      description: Elimina al usuario de forma física, limpiando en cascada sus posts, comentarios, imágenes y desvinculándolo de listas de seguidores.
+      parameters:
+        - name: nickName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Usuario y dependencias eliminados correctamente.
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/follow:
+    post:
+      tags:
+        - Users
+      summary: Seguir a un usuario (Bonus Followers)
+      description: Establece una relación bidireccional de seguimiento entre dos usuarios registrados.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - followerNick
+                - targetNick
+              properties:
+                followerNick:
+                  type: string
+                  example: "marquitos99"
+                targetNick:
+                  type: string
+                  example: "juan_unahur"
+      responses:
+        "200":
+          description: Operación de seguimiento exitosa.
+        "400":
+          description: Intento de auto-seguimiento o datos inválidos.
+        "404":
+          description: Uno o ambos usuarios no existen.
+
+  # --- ENDPOINTS: POSTS ---
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: Obtener todas las publicaciones
+      description: Lista los posts resolviendo los datos básicos del creador y sus etiquetas asociadas.
+      responses:
+        "200":
+          description: Listado exitoso.
+    post:
+      tags:
+        - Posts
+      summary: Crear una nueva publicación
+      description: Genera un post en el sistema. La descripción es mandatoria.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+                - createDate
+                - nickName
+              properties:
+                description:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                  example: "Terminando de codificar la documentación de la entrega final en la Uni"
+                createDate:
+                  type: string
+                  format: date-time
+                  example: "2026-06-15T15:30:00.000Z"
+                nickName:
+                  type: string
+                  example: "marquitos99"
+      responses:
+        "201":
+          description: Post publicado.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /posts/{postId}:
+    put:
+      tags:
+        - Posts
+      summary: Editar una publicación
+      description: Modifica la descripción de una publicación existente.
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          description: ID del post.
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+              properties:
+                description:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                  example: "Descripción actualizada"
+
+      responses:
+        "200":
+          description: Publicación actualizada correctamente.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+
+  /posts/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Obtener un post por ID (Con Caché y filtro temporal)
+      description: Busca la publicación. Si existe en Redis, la devuelve directo. Si va a la DB, filtra los comentarios para no mostrar los mayores a X meses (configurado en .env).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID único del post (MongoDB ObjectId de 24 caracteres).
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+      responses:
+        "200":
+          description: Post recuperado (Filtros de comentarios e imágenes aplicados).
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Posts
+      summary: Eliminar una publicación
+      description: Remueve el post y limpia su clave asociada en la caché de Redis.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post eliminado con éxito.
+        "404":
+          $ref: "#/components/responses/NotFound"
+       
+
+  /posts/{id}/tags:
+    post:
+      tags:
+        - Posts
+      summary: Asociar una etiqueta a un post
+      description: Vincula un Tag existente al post sin duplicar registros gracias a operadores atómicos.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tagId
+              properties:
+                tagId:
+                  type: string
+                  pattern: "^[0-9a-fA-F]{24}$"
+                  example: "648f1a2b3c4d5e6f7a8b9c0d"
+      responses:
+        "200":
+          description: Etiqueta vinculada correctamente e invalidación de caché ejecutada.
+        "404":
+          description: El Post o la Etiqueta no se encontraron.
+
+  # --- ENDPOINTS: COMMENTS ---
+  /comments:
+    post:
+      tags:
+        - Comments
+      summary: Crear un comentario en un post
+      description: Publica un comentario enlazado a un post específico por un usuario determinado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentForm"
+      responses:
+        "201":
+          description: Comentario creado con éxito.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /comments/{idComment}:
+    put:
+      tags:
+        - Comments
+      summary: Editar un comentario
+      description: Modifica el contenido de un comentario existente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del comentario.
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+              properties:
+                description:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                  example: "Comentario editado correctamente."
+      responses:
+        "200":
+          description: Comentario actualizado con éxito.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Comments
+      summary: Eliminar un comentario
+      description: Remueve físicamente un comentario del sistema mediante su ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comentario eliminado con éxito.
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # --- ENDPOINTS: POST IMAGES ---
+  /post-images:
+    post:
+      tags:
+        - Post Images
+      summary: Subir una imagen a un Post (Multer Server Upload)
+      description: Endpoint preparado para recibir un archivo binario (imagen) desde formularios web y vincularlo a un post.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - postId
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Archivo de imagen (jpeg, png, webp). Máx 5MB.
+                postId:
+                  type: string
+                  pattern: "^[0-9a-fA-F]{24}$"
+                  example: "648f1a2b3c4d5e6f7a8b9c01"
+      responses:
+        "201":
+          description: Imagen guardada de forma estática en el servidor y mapeada en la base de datos.
+        "400":
+          description: No se adjuntó ningún archivo o el formato no es el admitido.
+
+  /post-images/{postId}:
+    get:
+      tags:
+        - Post Images
+      summary: Obtener una imagen de un Post
+      description: Devuelve la imagen asociada a un post mediante su ID.
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          description: ID de la imagen.
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+      responses:
+        "200":
+          description: Imagen encontrada.
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+/post-images/{postId}/{imageId}:
+  delete:
+    tags:
+      - Post Images
+    summary: Eliminar una imagen de un post
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        description: ID del post.
+        schema:
+          type: string
+          pattern: "^[0-9a-fA-F]{24}$"
+
+      - name: imageId
+        in: path
+        required: true
+        description: ID de la imagen.
+        schema:
+          type: string
+          pattern: "^[0-9a-fA-F]{24}$"
+
+    responses:
+      "200":
+        description: Imagen eliminada correctamente.
+      "404":
+        $ref: "#/components/responses/NotFound"
+
+  # --- ENDPOINTS: TAGS ---
+  /tags:
+    get:
+      tags:
+        - Tags
+      summary: Obtener todas las etiquetas registradas
+      responses:
+        "200":
+          description: Colección de tags devuelta con éxito.
+    post:
+      tags:
+        - Tags
+      summary: Crear una nueva etiqueta única
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: "Tecnologia"
+      responses:
+        "201":
+          description: Tag guardado.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+components:
+  schemas:
+    # Esquemas para respuestas completas de Base de Datos
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "648f1a2b3c4d5e6f7a8b9c10"
+        nickName:
+          type: string
+          example: "marquitos99"
+        firstName:
+          type: string
+          example: "Marcos"
+        lastName:
+          type: string
+          example: "Pérez"
+        birthdate:
+          type: string
+          format: date
+          example: "2000-05-15"
+        age:
+          type: integer
+          example: 26
+        email:
+          type: string
+          example: "marcos@unahur.edu.ar"
+
+    UserProfile:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            following:
+              type: array
+              items:
+                type: string
+                description: IDs de los usuarios seguidos.
+            followedBy:
+              type: array
+              items:
+                type: string
+                description: IDs de los seguidores.
+
+    # Esquemas para datos requeridos en peticiones entrantes (Formularios / Payloads)
+    UserForm:
+      type: object
+      required:
+        - nickName
+        - firstName
+        - lastName
+        - birthdate
+        - email
+      properties:
+        nickName:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: "marquitos99"
+        firstName:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: "Marcos"
+        lastName:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: "Pérez"
+        birthdate:
+          type: string
+          format: date
+          example: "2000-05-15"
+        email:
+          type: string
+          format: email
+          example: "marcos@unahur.edu.ar"
+
+    CommentForm:
+      type: object
+      required:
+        - text
+        - createDate
+        - visible
+        - nickName
+        - postId
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: "Totalmente de acuerdo con el posteo!"
+        createDate:
+          type: string
+          format: date-time
+          example: "2026-06-15T15:45:00.000Z"
+        visible:
+          type: boolean
+          default: true
+          example: true
+        nickName:
+          type: string
+          example: "marquitos99"
+        postId:
+          type: string
+          pattern: "^[0-9a-fA-F]{24}$"
+          example: "648f1a2b3c4d5e6f7a8b9c01"
+
+  responses:
+    BadRequest:
+      description: Datos enviados inválidos o fallas en las reglas de Joi.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "El texto del comentario no puede estar vacío"
+    NotFound:
+      description: El recurso solicitado no existe en la base de datos documental.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Recurso no encontrado"
+    ServerError:
+      description: Error no controlado interno del servidor.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Error al procesar la solicitud"
+              error:
+                type: string
