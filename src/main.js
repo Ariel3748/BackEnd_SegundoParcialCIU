@@ -6,6 +6,7 @@ const path = require("path");
 const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
+const connectDB = require("../config/db");
 
 // Carga el archivo YAML de Swagger de forma segura posterior al require
 const swaggerDocument = YAML.load("./docs/swagger.yaml");
@@ -28,7 +29,6 @@ connectDB()
 
 // Importar cliente de Redis
 const cache = require("../config/redisClient");
-const connectDB = require("../config/db");
 
 // Manejo de Rutas de la API
 app.use("/users", require("../routes/user.routes"));
