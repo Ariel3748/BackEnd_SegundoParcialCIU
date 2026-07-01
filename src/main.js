@@ -23,22 +23,12 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
-// Conexión a MongoDB con Mongoose
-const MONGODB_URI =
-  process.env.MONGODB_URI;
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log("Conexión exitosa a MongoDB con Mongoose.");
-  })
-  .catch((error) => {
-    console.error("Error al conectar a MongoDB:", error.message);
-  });
 
-//connectDB()
+connectDB()
 
 // Importar cliente de Redis
 const cache = require("../config/redisClient");
+const connectDB = require("../config/db");
 
 // Manejo de Rutas de la API
 app.use("/users", require("../routes/user.routes"));
