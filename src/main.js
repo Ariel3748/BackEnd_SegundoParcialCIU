@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL
+  origin: process.env.FRONTEND_URL 
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -24,21 +24,18 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
 // Conexión a MongoDB con Mongoose
-const connectDB = async () => {
-  try {
-    const connString = process.env.MONGO_URI;
-    if (!connString) {
-      throw new Error('La variable de entorno MONGO_URI no está definida');
-    }
-    await mongoose.connect(connString);
-    console.log('Conexión exitosa a MongoDB Atlas');
-  } catch (error) {
-    console.error('Error al conectar a la base de datos:', error);
-    process.exit(1);
-  }
-};
+const MONGODB_URI =
+  process.env.MONGODB_URI;
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log("Conexión exitosa a MongoDB con Mongoose.");
+  })
+  .catch((error) => {
+    console.error("Error al conectar a MongoDB:", error.message);
+  });
 
-connectDB()
+//connectDB()
 
 // Importar cliente de Redis
 const cache = require("../config/redisClient");
